@@ -34,6 +34,7 @@ STOP_WORDS = [
 ]
 
 def pickAckWord():
+    global ACK
     return ACK[random.randint(0, len(ACK) - 1)]
 
 def loadConfigs():
@@ -68,8 +69,7 @@ def on_message(client, userdata, message):
     print "[Topic]: " + str(topic)
     print "[Payload]: " + msg
 
-
-    global EndNextAsr
+    global EndNextAsr, STOP_WORDS, mqttServer, mqttPort, siteId
 
     if topic == "hermes/asr/startListening":
         if EndNextAsr:
@@ -80,7 +80,6 @@ def on_message(client, userdata, message):
             publish.single('hermes/artifice/stop', payload=json.dumps({'siteId': msgJson["siteId"]}), hostname=mqttServer, port=mqttPort)
             EndNextAsr = True
     elif "text" in msgJson and msgJson["text"].lower() in STOP_WORDS:
-        global mqttServer, mqttPort, siteId
         publish.single('hermes/dialogueManager/endSession', payload=json.dumps({'sessionId': msgJson["sessionId"], 'text': pickAckWord()}), hostname=mqttServer, port=mqttPort)
         publish.single('hermes/artifice/stop', payload=json.dumps({'siteId': msgJson["siteId"]}), hostname=mqttServer, port=mqttPort)
 
@@ -99,8 +98,8 @@ EndNextAsr = False
 loadConfigs()
 tmpClient = paho.Client("action-stop-"+str(int(round(time.time() * 1000))))
 tmpClient.on_message=on_message
-tmpClient.on_connect=on_connect
-tmpClient.on_log=on_log
+# tmpClient.on_connect=on_connect
+# tmpClient.on_log=on_log
 tmpClient.connect(mqttServer, mqttPort)
 tmpClient.subscribe("hermes/asr/textCaptured")
 tmpClient.subscribe("hermes/hotword/default/detected") #python script-recording.py stop
