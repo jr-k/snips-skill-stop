@@ -82,6 +82,7 @@ def on_message(client, userdata, message):
     elif "text" in msgJson and msgJson["text"].lower() in STOP_WORDS:
         global mqttServer, mqttPort, siteId
         publish.single('hermes/dialogueManager/endSession', payload=json.dumps({'sessionId': msgJson["sessionId"], 'text': pickAckWord()}), hostname=mqttServer, port=mqttPort)
+        publish.single('hermes/artifice/stop', payload=json.dumps({'siteId': msgJson["siteId"]}), hostname=mqttServer, port=mqttPort)
 
 def on_connect(client, userdata, flag, rc):
     print("connected")
