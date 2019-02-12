@@ -69,9 +69,16 @@ def on_message(client, userdata, message):
     print "[Payload]: " + msg
 
 
-    if topic == "hermes/hotword/default/detected":
+    global EndNextAsr
+
+    if topic == "hermes/asr/startListening":
+        if EndNextAsr:
+            EndNextAsr = False
+            publish.single('hermes/dialogueManager/endSession', payload=json.dumps({'sessionId': msgJson["sessionId"], 'text': pickAckWord()}), hostname=mqttServer, port=mqttPort)
+    elif topic == "hermes/hotword/default/detected":
         if msgJson["modelId"] == "stop":
             publish.single('hermes/artifice/stop', payload=json.dumps({'siteId': msgJson["siteId"]}), hostname=mqttServer, port=mqttPort)
+            EndNextAsr = True
     elif "text" in msgJson and msgJson["text"].lower() in STOP_WORDS:
         global mqttServer, mqttPort, siteId
         publish.single('hermes/dialogueManager/endSession', payload=json.dumps({'sessionId': msgJson["sessionId"], 'text': pickAckWord()}), hostname=mqttServer, port=mqttPort)
@@ -86,13 +93,16 @@ def on_disconnected(client, userdata, rc):
 def on_log(client, userdata, level, buf):
     print("log: ",buf)
 
+EndNextAsr = False
+
 loadConfigs()
-tmpClient = paho.Client("action-stop-"+siteId)
+tmpClient = paho.Client("action-stop-"+str(int(round(time.time() * 1000))))
 tmpClient.on_message=on_message
 tmpClient.on_connect=on_connect
 tmpClient.on_log=on_log
 tmpClient.connect(mqttServer, mqttPort)
 tmpClient.subscribe("hermes/asr/textCaptured")
 tmpClient.subscribe("hermes/hotword/default/detected") #python script-recording.py stop
+tmpClient.subscribe("hermes/asr/startListening")
 # tmpClient.subscribe("hermes/asr/partialTextCaptured")
 tmpClient.loop_forever()
