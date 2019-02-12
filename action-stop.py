@@ -38,27 +38,27 @@ def pickAckWord():
     return ACK[random.randint(0, len(ACK) - 1)]
 
 def loadConfigs():
-	global mqttServer, mqttPort, siteId, hotwordId
-
-	if os.path.isfile(SNIPS_CONFIG_PATH):
-		with open(SNIPS_CONFIG_PATH) as confFile:
-			configs = pytoml.load(confFile)
-			if 'mqtt' in configs['snips-common']:
-				if ':' in configs['snips-common']['mqtt']:
-					mqttServer = configs['snips-common']['mqtt'].split(':')[0]
-					mqttPort = int(configs['snips-common']['mqtt'].split(':')[1])
-				elif '@' in configs['snips-common']['mqtt']:
-					mqttServer = configs['snips-common']['mqtt'].split('@')[0]
-					mqttPort = int(configs['snips-common']['mqtt'].split('@')[1])
-			if 'bind' in configs['snips-audio-server']:
-				if ':' in configs['snips-audio-server']['bind']:
-					siteId = configs['snips-audio-server']['bind'].split(':')[0]
-				elif '@' in configs['snips-audio-server']['bind']:
-					siteId = configs['snips-audio-server']['bind'].split('@')[0]
-			if 'hotword_id' in configs['snips-hotword']:
-				hotwordId = configs['snips-hotword']['hotword_id']
-	else:
-		print('Snips configs not found')
+    global mqttServer, mqttPort, siteId, hotwordId
+    
+    if os.path.isfile(SNIPS_CONFIG_PATH):
+        with open(SNIPS_CONFIG_PATH) as confFile:
+            configs = pytoml.load(confFile)
+            if 'mqtt' in configs['snips-common']:
+                if ':' in configs['snips-common']['mqtt']:
+                    mqttServer = configs['snips-common']['mqtt'].split(':')[0]
+                    mqttPort = int(configs['snips-common']['mqtt'].split(':')[1])
+                elif '@' in configs['snips-common']['mqtt']:
+                    mqttServer = configs['snips-common']['mqtt'].split('@')[0]
+                    mqttPort = int(configs['snips-common']['mqtt'].split('@')[1])
+            if 'bind' in configs['snips-audio-server']:
+                if ':' in configs['snips-audio-server']['bind']:
+                    siteId = configs['snips-audio-server']['bind'].split(':')[0]
+                elif '@' in configs['snips-audio-server']['bind']:
+                    siteId = configs['snips-audio-server']['bind'].split('@')[0]
+            if 'hotword_id' in configs['snips-hotword']:
+                hotwordId = configs['snips-hotword']['hotword_id']
+    else:
+        print('Snips configs not found')
 
 
 def on_message(client, userdata, message):
